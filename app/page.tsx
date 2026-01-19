@@ -136,6 +136,42 @@ export default function Home() {
 
   if (quizState === "result") {
     const result = calculateResult();
+    const shareText = `I'm ${result.title}! My perfect coffee is ${result.coffee}. ${result.tagline} Find yours at Basecamp Coffee!`;
+    const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+
+    const handleShare = async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "My Coffee Personality",
+            text: shareText,
+            url: shareUrl,
+          });
+        } catch (err) {
+          // User cancelled or share failed
+        }
+      }
+    };
+
+    const shareToTwitter = () => {
+      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+      window.open(url, "_blank", "width=550,height=420");
+    };
+
+    const shareToFacebook = () => {
+      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+      window.open(url, "_blank", "width=550,height=420");
+    };
+
+    const copyLink = async () => {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert("Link copied!");
+      } catch (err) {
+        // Fallback for older browsers
+        prompt("Copy this link:", shareUrl);
+      }
+    };
 
     return (
       <div className="quiz-container">
@@ -148,6 +184,27 @@ export default function Home() {
           <p className="result-cta">
             Pop into your local Basecamp and try your perfect match!
           </p>
+
+          <div className="share-section">
+            <p className="share-label">Share your result:</p>
+            <div className="share-buttons">
+              <button onClick={shareToTwitter} className="share-button share-twitter" aria-label="Share on X">
+                𝕏
+              </button>
+              <button onClick={shareToFacebook} className="share-button share-facebook" aria-label="Share on Facebook">
+                f
+              </button>
+              <button onClick={copyLink} className="share-button share-copy" aria-label="Copy link">
+                🔗
+              </button>
+              {typeof navigator !== "undefined" && navigator.share && (
+                <button onClick={handleShare} className="share-button share-native" aria-label="Share">
+                  📤
+                </button>
+              )}
+            </div>
+          </div>
+
           <button className="restart-button" onClick={handleRestart}>
             Take Quiz Again
           </button>
