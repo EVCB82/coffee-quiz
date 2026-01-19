@@ -1,65 +1,160 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
+import {
+  questions,
+  coffeeResults,
+  PersonalityType,
+  CoffeeResult,
+} from "./data/quizData";
+
+type QuizState = "welcome" | "quiz" | "result";
 
 export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+  const [quizState, setQuizState] = useState<QuizState>("welcome");
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [answers, setAnswers] = useState<PersonalityType[]>([]);
+
+  const handleStartQuiz = () => {
+    setQuizState("quiz");
+    setCurrentQuestion(0);
+    setAnswers([]);
+  };
+
+  const handleAnswer = (personality: PersonalityType) => {
+    const newAnswers = [...answers, personality];
+    setAnswers(newAnswers);
+
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    } else {
+      setQuizState("result");
+    }
+  };
+
+  const calculateResult = (): CoffeeResult => {
+    const counts: Record<PersonalityType, number> = {
+      adventurer: 0,
+      classic: 0,
+      creative: 0,
+      socialite: 0,
+      intellectual: 0,
+      minimalist: 0,
+      romantic: 0,
+      energizer: 0,
+      nurturer: 0,
+      trendsetter: 0,
+    };
+
+    answers.forEach((answer) => {
+      counts[answer]++;
+    });
+
+    let maxCount = 0;
+    let winningPersonality: PersonalityType = "classic";
+
+    (Object.keys(counts) as PersonalityType[]).forEach((personality) => {
+      if (counts[personality] > maxCount) {
+        maxCount = counts[personality];
+        winningPersonality = personality;
+      }
+    });
+
+    return coffeeResults[winningPersonality];
+  };
+
+  const handleRestart = () => {
+    setQuizState("welcome");
+    setCurrentQuestion(0);
+    setAnswers([]);
+  };
+
+  if (quizState === "welcome") {
+    return (
+      <div className="quiz-container">
+        <div className="quiz-card">
+          <div className="logo-container">
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              src="/basecamp-logo.svg"
+              alt="Basecamp Coffee"
+              width={200}
+              height={60}
+              priority
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+          <h1 className="quiz-title">Find Your Perfect Brew</h1>
+          <p className="quiz-subtitle">
+            At Basecamp Coffee, we believe your coffee should be as unique as you are.
+            Answer 8 simple questions and discover which drink from our menu matches your personality.
+          </p>
+          <button className="start-button" onClick={handleStartQuiz}>
+            Start Quiz
+          </button>
         </div>
-      </main>
-    </div>
-  );
+      </div>
+    );
+  }
+
+  if (quizState === "quiz") {
+    const question = questions[currentQuestion];
+    const progress = ((currentQuestion + 1) / questions.length) * 100;
+
+    return (
+      <div className="quiz-container">
+        <div className="quiz-card">
+          <div className="progress-container">
+            <p className="progress-text">
+              Question {currentQuestion + 1} of {questions.length}
+            </p>
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+
+          <h2 className="question-text">{question.question}</h2>
+
+          <div className="answers-container">
+            {question.answers.map((answer, index) => (
+              <button
+                key={index}
+                className="answer-button"
+                onClick={() => handleAnswer(answer.personality)}
+              >
+                <span className="answer-icon">{answer.icon}</span>
+                <span className="answer-text">{answer.text}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (quizState === "result") {
+    const result = calculateResult();
+
+    return (
+      <div className="quiz-container">
+        <div className="quiz-card">
+          <div className="result-icon">{result.icon}</div>
+          <h1 className="result-title">{result.title}</h1>
+          <p className="result-coffee">Your Basecamp Order: {result.coffee}</p>
+          <p className="result-tagline">&ldquo;{result.tagline}&rdquo;</p>
+          <p className="result-description">{result.description}</p>
+          <p className="result-cta">
+            Pop into your local Basecamp and try your perfect match!
+          </p>
+          <button className="restart-button" onClick={handleRestart}>
+            Take Quiz Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }

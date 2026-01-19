@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" fill="none">
+  <!-- Mountain peaks -->
+  <path d="M20 45 L35 20 L50 45" stroke="#2d5a3d" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M40 45 L55 25 L70 45" stroke="#2d5a3d" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Coffee cup steam hint -->
+  <path d="M55 18 Q58 12 55 8" stroke="#8b5e3c" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- Text: BASECAMP -->
+  <text x="80" y="32" font-family="Georgia, serif" font-size="18" font-weight="bold" fill="#2d5a3d">BASECAMP</text>
+
+  <!-- Text: COFFEE -->
+  <text x="80" y="48" font-family="Georgia, serif" font-size="12" fill="#8b5e3c" letter-spacing="3">COFFEE</text>
+</svg>
